@@ -98,6 +98,3 @@ def tokenize(json_string: str) -> List[str]:
             index = extract_special(json_string, index, tokens)
 
     return tokens
-
-
-tokenize('{"value": 42}')
