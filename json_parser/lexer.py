@@ -4,7 +4,7 @@ from typing import List
 
 
 class TokenizeError(Exception):
-    """Error thrown when an invalid JSON string is parsed"""
+    """Error thrown when an invalid JSON string is tokenized"""
 
 
 def extract_string(json_string: str, index: int, tokens: List[str]) -> int:
@@ -73,11 +73,10 @@ def extract_special(json_string: str, index: int, tokens: List[str]) -> int:
 
 def tokenize(json_string: str) -> List[str]:
     """Converts a JSON string into a list of tokens"""
-    index = 0
-    end = len(json_string)
-
     tokens: List[str] = []
 
+    index = 0
+    end = len(json_string)
     while index < end:
         char = json_string[index]
 
