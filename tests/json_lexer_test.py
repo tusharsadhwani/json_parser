@@ -8,6 +8,8 @@ import json_parser.lexer
 @pytest.mark.parametrize(
     ('json_string', 'expected'),
     (
+        ('"abc"', ['"abc"']),
+        ('42', ['42']),
         ('{}', ['{', '}']),
         ('{"abc": "def"}', ['{', '"abc"', ':', '"def"', '}']),
         ('{"value": 42}', ['{', '"value"', ':', '42', '}']),

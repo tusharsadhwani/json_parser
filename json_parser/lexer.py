@@ -58,12 +58,12 @@ def extract_number(json_string: str, index: int, tokens: Deque[str]) -> int:
             leading_minus_found = True
 
         elif not char.isdigit():
-            string_token = json_string[start:index]
-            tokens.append(string_token)
-            return index
+            break
 
         index += 1
 
+    string_token = json_string[start:index]
+    tokens.append(string_token)
     return index
 
 
