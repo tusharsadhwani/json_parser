@@ -24,7 +24,7 @@ def parse_object(tokens: List[str]) -> JSONObject:
     while tokens:
         token = tokens.pop(0)
 
-        # least amount of tokens left shouldif be a colon, a token and a }
+        # least amount of tokens left should be a colon, a token and a }
         if len(tokens) < 3:
             raise ParseError("Unexpected end of file while parsing")
 
