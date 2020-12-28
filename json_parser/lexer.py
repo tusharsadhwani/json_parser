@@ -112,4 +112,6 @@ def tokenize(json_string: str) -> Deque[str]:
         else:
             index = extract_special(json_string, index, tokens)
 
+    if len(tokens) == 0:
+        raise TokenizeError("Cannot parse empty string")
     return tokens
