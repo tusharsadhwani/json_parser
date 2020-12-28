@@ -8,7 +8,7 @@ class TokenizeError(Exception):
 
 
 def extract_string(json_string: str, index: int, tokens: List[str]) -> int:
-    """Extracts a single string token from json string"""
+    """Extracts a single string token from JSON string"""
     start = index
     end = len(json_string)
     index += 1
@@ -27,7 +27,7 @@ def extract_string(json_string: str, index: int, tokens: List[str]) -> int:
 
 
 def extract_number(json_string: str, index: int, tokens: List[str]) -> int:
-    """Extracts a single number token (eg. 42 or 12.3) from json string"""
+    """Extracts a single number token (eg. 42 or 12.3) from JSON string"""
     start = index
     end = len(json_string)
 
@@ -52,7 +52,7 @@ def extract_number(json_string: str, index: int, tokens: List[str]) -> int:
 
 
 def extract_special(json_string: str, index: int, tokens: List[str]) -> int:
-    """Extracts true, false and null from json string"""
+    """Extracts true, false and null from JSON string"""
     end = len(json_string)
 
     word = ''

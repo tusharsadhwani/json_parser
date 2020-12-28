@@ -13,7 +13,7 @@ class ParseError(Exception):
 
 
 def parse_object(tokens: List[str]) -> JSONObject:
-    """Parses an object out of json tokens"""
+    """Parses an object out of JSON tokens"""
     obj: JSONObject = {}
 
     # special case:
@@ -55,7 +55,7 @@ def parse_object(tokens: List[str]) -> JSONObject:
 
 
 def parse_array(tokens: List[str]) -> JSONArray:
-    """Parses an array out of json tokens"""
+    """Parses an array out of JSON tokens"""
     array: JSONArray = []
 
     # special case:
@@ -82,12 +82,12 @@ def parse_array(tokens: List[str]) -> JSONArray:
 
 
 def parse_string(token: str) -> str:
-    """Parses a string out of a json token"""
+    """Parses a string out of a JSON token"""
     return token[1:-1]
 
 
 def parse_number(token: str) -> JSONNumber:
-    """Parses a number out of a json token"""
+    """Parses a number out of a JSON token"""
     try:
         if token.isdigit():
             number: JSONNumber = int(token)
@@ -127,7 +127,7 @@ def _parse(tokens: List[str]) -> object:
 
 
 def parse(json_string: str) -> object:
-    """Parses a json string into a Python object"""
+    """Parses a JSON string into a Python object"""
     tokens = tokenize(json_string)
 
     value = _parse(tokens)
