@@ -30,13 +30,13 @@ def parse_object(tokens: List[str]) -> JSONObject:
 
         if not token.startswith('"'):
             raise ParseError(
-                "Expected string key for object, found {}".format(token))
+                f"Expected string key for object, found {token}")
 
         key = parse_string(token)
 
         token = tokens.pop(0)
         if token != ':':
-            raise ParseError("Expected colon, found {}".format(token))
+            raise ParseError(f"Expected colon, found {token}")
 
         value = _parse(tokens)
         obj[key] = value
@@ -46,7 +46,7 @@ def parse_object(tokens: List[str]) -> JSONObject:
 
         token = tokens.pop(0)
         if token not in ',}':
-            raise ParseError("Expected ',' or '}}', found {}".format(token))
+            raise ParseError(f"Expected ',' or '}}', found {token}")
 
         if token == '}':
             break
@@ -73,7 +73,7 @@ def parse_array(tokens: List[str]) -> JSONArray:
 
         token = tokens.pop(0)
         if token not in ',]':
-            raise ParseError("Expected ',' or ']', found {}".format(token))
+            raise ParseError(f"Expected ',' or ']', found {token}")
 
         if token == ']':
             break
@@ -96,7 +96,7 @@ def parse_number(token: str) -> JSONNumber:
         return number
 
     except ValueError as err:
-        raise ParseError("Invalid token: {}".format(token)) from err
+        raise ParseError(f"Invalid token: {token}") from err
 
 
 def _parse(tokens: List[str]) -> object:
@@ -123,7 +123,7 @@ def _parse(tokens: List[str]) -> object:
     if token in special_tokens:
         return special_tokens[token]
 
-    raise ParseError("Unexpected token: {}".format(token))
+    raise ParseError(f"Unexpected token: {token}")
 
 
 def parse(json_string: str) -> object:
@@ -132,6 +132,6 @@ def parse(json_string: str) -> object:
 
     value = _parse(tokens)
     if len(tokens) != 0:
-        raise ParseError("Invalid JSON at {}".format(tokens[0]))
+        raise ParseError(f"Invalid JSON at {tokens[0]}")
 
     return value

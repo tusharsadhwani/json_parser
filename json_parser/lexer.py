@@ -68,7 +68,7 @@ def extract_special(json_string: str, index: int, tokens: List[str]) -> int:
         tokens.append(word)
         return index
 
-    raise TokenizeError("Unknown token found: {}".format(word))
+    raise TokenizeError(f"Unknown token found: {word}")
 
 
 def tokenize(json_string: str) -> List[str]:
