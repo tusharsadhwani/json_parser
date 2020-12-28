@@ -13,6 +13,8 @@ import json_parser
         ('{"abc": "def"}', {"abc": "def"}),
         ('{"value": 42}', {"value": 42}),
         ('{"value": -12.3}', {"value": -12.3}),
+        ('{"value": "\\\"Hello\\\" \\n\\b\\f\\t\\u0123"}',
+         {"value": '"Hello" \n\b\f\t\u0123'}),
         ('["foo", "bar"]', ["foo", "bar"]),
         ('[1, 2, 3]', [1, 2, 3]),
         ('{"value1": true, "value2": false, "value3": null}',

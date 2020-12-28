@@ -1,6 +1,6 @@
 """Lexer functions"""
-from collections import deque
 import string
+from collections import deque
 from typing import Deque
 
 
@@ -16,6 +16,14 @@ def extract_string(json_string: str, index: int, tokens: Deque[str]) -> int:
 
     while index < end:
         char = json_string[index]
+
+        if char == '\\':
+            if index + 1 == end:
+                raise TokenizeError("Incomplete escape at end of string")
+
+            index += 2
+            continue
+
         if char == '"':
             index += 1
             string_token = json_string[start:index]

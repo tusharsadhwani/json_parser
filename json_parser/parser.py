@@ -1,4 +1,5 @@
 """Parser functions"""
+from ast import literal_eval
 from typing import Deque, Dict, List, Union
 
 from json_parser.lexer import tokenize
@@ -82,7 +83,49 @@ def parse_array(tokens: Deque[str]) -> JSONArray:
 
 def parse_string(token: str) -> str:
     """Parses a string out of a JSON token"""
-    return token[1:-1]
+    chars: List[str] = []
+
+    index = 1
+    end = len(token) - 1
+    while index < end:
+        char = token[index]
+
+        if char != '\\':
+            chars.append(char)
+            index += 1
+            continue
+
+        next_char = token[index+1]
+        if next_char == 'u':
+            hex_string = token[index+2:index+6]
+            try:
+                unicode_char = literal_eval(f'"\\u{hex_string}"')
+            except ValueError as err:
+                raise ParseError(f"Invalid escape: \\u{hex_string}") from err
+
+            chars.append(unicode_char)
+            index += 6
+            continue
+
+        if next_char in '"\/':
+            chars.append(next_char)
+        elif next_char == 'b':
+            chars.append('\b')
+        elif next_char == 'f':
+            chars.append('\f')
+        elif next_char == 'n':
+            chars.append('\n')
+        elif next_char == 't':
+            chars.append('\t')
+        elif next_char == 't':
+            chars.append('\t')
+        else:
+            raise ParseError(f"Unknown escape sequence found in {token}")
+
+        index += 2
+
+    string = ''.join(chars)
+    return string
 
 
 def parse_number(token: str) -> JSONNumber:
