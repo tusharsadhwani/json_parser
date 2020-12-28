@@ -1,5 +1,8 @@
 """JSON parser tests"""
+import json
+import urllib.request
 from typing import Dict
+
 import pytest
 
 import json_parser
@@ -118,3 +121,12 @@ import json_parser
 def test_parser(json_string: str, expected: Dict[str, object]) -> None:
     """JSON parser tests"""
     assert json_parser.parse(json_string) == expected
+
+
+def test_parse_large_file() -> None:
+    """Download and parse a 25MB JSON file from the internet"""
+    url = "https://raw.githubusercontent.com/json-iterator/test-data/master/large-file.json"
+    with urllib.request.urlopen(url) as json_file:
+        json_string = json_file.read().decode()
+
+    assert json_parser.parse(json_string) == json.loads(json_string)
