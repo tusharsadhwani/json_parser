@@ -107,7 +107,7 @@ def parse_string(token: str) -> str:
             index += 6
             continue
 
-        if next_char in '"\/':
+        if next_char in '"\\/':
             chars.append(next_char)
         elif next_char == 'b':
             chars.append('\b')
@@ -115,8 +115,8 @@ def parse_string(token: str) -> str:
             chars.append('\f')
         elif next_char == 'n':
             chars.append('\n')
-        elif next_char == 't':
-            chars.append('\t')
+        elif next_char == 'r':
+            chars.append('\r')
         elif next_char == 't':
             chars.append('\t')
         else:
