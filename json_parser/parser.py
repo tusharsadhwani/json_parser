@@ -10,7 +10,7 @@ JSONNumber = Union[int, float]
 
 
 class ParseError(Exception):
-    """Error thrown when an invalid JSON tokens is parsed"""
+    """Error thrown when invalid JSON tokens are parsed"""
 
 
 def parse_object(tokens: Deque[str]) -> JSONObject:
