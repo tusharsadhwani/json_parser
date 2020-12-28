@@ -27,10 +27,11 @@ def extract_string(json_string: str, index: int, tokens: List[str]) -> int:
 
 
 def extract_number(json_string: str, index: int, tokens: List[str]) -> int:
-    """Extracts a single number token (eg. 42 or 12.3) from JSON string"""
+    """Extracts a single number token (eg. 42, -12.3) from JSON string"""
     start = index
     end = len(json_string)
 
+    leading_minus_found = False
     decimal_point_found = False
 
     while index < end:
@@ -40,6 +41,12 @@ def extract_number(json_string: str, index: int, tokens: List[str]) -> int:
                 raise TokenizeError("Too many decimal points in number")
 
             decimal_point_found = True
+
+        elif char == '-':
+            if leading_minus_found:
+                raise TokenizeError("Minus sign in between number")
+
+            leading_minus_found = True
 
         elif not char.isdigit():
             string_token = json_string[start:index]
@@ -90,7 +97,7 @@ def tokenize(json_string: str) -> List[str]:
         elif char == '"':
             index = extract_string(json_string, index, tokens)
 
-        elif char.isdigit():
+        elif char == '-' or char.isdigit():
             index = extract_number(json_string, index, tokens)
 
         else:

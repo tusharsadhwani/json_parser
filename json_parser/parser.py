@@ -29,8 +29,7 @@ def parse_object(tokens: List[str]) -> JSONObject:
             raise ParseError("Unexpected end of file while parsing")
 
         if not token.startswith('"'):
-            raise ParseError(
-                f"Expected string key for object, found {token}")
+            raise ParseError(f"Expected string key for object, found {token}")
 
         key = parse_string(token)
 
@@ -112,7 +111,7 @@ def _parse(tokens: List[str]) -> object:
     if token.startswith('"'):
         return parse_string(token)
 
-    if token[0].isdigit():
+    if token[0] == '-' or token[0].isdigit():
         return parse_number(token)
 
     special_tokens = {
