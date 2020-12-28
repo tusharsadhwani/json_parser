@@ -128,6 +128,12 @@ def test_parser(json_string: str, expected: Dict[str, object]) -> None:
     ('json_string', 'error_message'),
     (
         ('[1, 2, 3,]', 'Expected value after comma, found ]'),
+        ('[1, 2 "hello"]', "Expected ',' or ']', found \"hello\""),
+        ('{35: "test"}', "Expected string key for object, found 35"),
+        ('{"abc":}', "Expected value after colon, found }"),
+        ('{"abc":"def",}', "Expected value after comma, found }"),
+        ('{"abc":', "Unexpected end of file while parsing"),
+        ('[2,', "Unexpected end of file while parsing"),
     )
 )
 def test_parser_failure(json_string: str, error_message: str) -> None:

@@ -25,23 +25,29 @@ def parse_object(tokens: Deque[str]) -> JSONObject:
     while tokens:
         token = tokens.popleft()
 
-        # least amount of tokens left should be a colon, a token and a }
-        if len(tokens) < 3:
-            raise ParseError("Unexpected end of file while parsing")
-
         if not token.startswith('"'):
             raise ParseError(f"Expected string key for object, found {token}")
 
         key = parse_string(token)
 
+        if len(tokens) == 0:
+            raise ParseError("Unexpected end of file while parsing")
+
         token = tokens.popleft()
         if token != ':':
             raise ParseError(f"Expected colon, found {token}")
 
+        # Missing value for key
+        if len(tokens) == 0:
+            raise ParseError("Unexpected end of file while parsing")
+
+        if tokens[0] == '}':
+            raise ParseError("Expected value after colon, found }")
+
         value = _parse(tokens)
         obj[key] = value
 
-        if not tokens:
+        if len(tokens) == 0:
             raise ParseError("Unexpected end of file while parsing")
 
         token = tokens.popleft()
@@ -50,6 +56,13 @@ def parse_object(tokens: Deque[str]) -> JSONObject:
 
         if token == '}':
             break
+
+        # Trailing comma check
+        if len(tokens) == 0:
+            raise ParseError("Unexpected end of file while parsing")
+
+        if tokens[0] == '}':
+            raise ParseError("Expected value after comma, found }")
 
     return obj
 
@@ -79,6 +92,9 @@ def parse_array(tokens: Deque[str]) -> JSONArray:
             break
 
         # trailing comma check
+        if len(tokens) == 0:
+            raise ParseError("Unexpected end of file while parsing")
+
         if tokens[0] == ']':
             raise ParseError("Expected value after comma, found ]")
 

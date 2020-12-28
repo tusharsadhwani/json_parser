@@ -36,6 +36,7 @@ def test_lexer(json_string: str, expected: List[str]) -> None:
     ('json_string', 'error_message'),
     (
         ('', 'Cannot parse empty string'),
+        ('blabla', 'Unknown token found: blabla'),
         ('"abc', 'Expected end of string'),
         ('"abc\\"', 'Expected end of string'),
         ('["a", "b", c]', 'Unknown token found: c'),
