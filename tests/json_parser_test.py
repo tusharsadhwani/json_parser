@@ -1,12 +1,12 @@
 """JSON parser tests"""
 import json
-from json_parser.parser import ParseError
 import urllib.request
 from typing import Dict
 
 import pytest
 
 import json_parser
+from json_parser.parser import ParseError
 
 
 @pytest.mark.parametrize(
