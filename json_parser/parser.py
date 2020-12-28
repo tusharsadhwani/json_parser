@@ -135,6 +135,3 @@ def parse(json_string: str) -> object:
         raise ParseError("Invalid JSON at {}".format(tokens[0]))
 
     return value
-
-
-parse('["foo", "bar"]')
