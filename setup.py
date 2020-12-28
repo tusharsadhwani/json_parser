@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="json_parser",
-    version="0.1.0",
+    version="1.0.0",
     author="Tushar Sadhwani",
     author_email="tushar.sadhwani000@gmail.com",
     description="A JSON parser written in Python.",
