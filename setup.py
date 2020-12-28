@@ -1,11 +1,11 @@
-import setuptools  # type: ignore
+import setuptools
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="json_parser",
-    version="1.0.0",
+    version="1.0.1",
     author="Tushar Sadhwani",
     author_email="tushar.sadhwani000@gmail.com",
     description="A JSON parser written in Python.",

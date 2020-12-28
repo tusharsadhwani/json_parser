@@ -2,11 +2,28 @@
 
 An _efficient_ JSON parser written in Python.
 
-## usage
+## Installation
+
+Install it via pip:
+
+```console
+pip install json-parser
+```
+
+## Usage
 
 ```py
 import json_parser
 
-json_object = json_parser.parse('{"value": 42}')
-print(json_object['value']) # 42
+data = json_parser.parse('{"value": 42}')
+print(data['value']) # 42
+```
+
+## Testing
+
+Clone the app and run the following:
+
+```console
+pip install -e .
+pytest
 ```
