@@ -78,6 +78,10 @@ def parse_array(tokens: Deque[str]) -> JSONArray:
         if token == ']':
             break
 
+        # trailing comma check
+        if tokens[0] == ']':
+            raise ParseError("Expected value after comma, found ]")
+
     return array
 
 

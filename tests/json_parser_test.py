@@ -1,5 +1,6 @@
 """JSON parser tests"""
 import json
+from json_parser.parser import ParseError
 import urllib.request
 from typing import Dict
 
@@ -121,6 +122,21 @@ import json_parser
 def test_parser(json_string: str, expected: Dict[str, object]) -> None:
     """JSON parser tests"""
     assert json_parser.parse(json_string) == expected
+
+
+@pytest.mark.parametrize(
+    ('json_string', 'error_message'),
+    (
+        ('[1, 2, 3,]', 'Expected value after comma, found ]'),
+    )
+)
+def test_parser_failure(json_string: str, error_message: str) -> None:
+    """JSON parser test failures"""
+    with pytest.raises(ParseError) as exinfo:
+        json_parser.parse(json_string)
+
+    msg, = exinfo.value.args
+    assert msg == error_message
 
 
 def test_parse_large_file() -> None:
