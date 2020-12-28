@@ -1,13 +1,14 @@
 """Lexer functions"""
+from collections import deque
 import string
-from typing import List
+from typing import Deque
 
 
 class TokenizeError(Exception):
     """Error thrown when an invalid JSON string is tokenized"""
 
 
-def extract_string(json_string: str, index: int, tokens: List[str]) -> int:
+def extract_string(json_string: str, index: int, tokens: Deque[str]) -> int:
     """Extracts a single string token from JSON string"""
     start = index
     end = len(json_string)
@@ -26,7 +27,7 @@ def extract_string(json_string: str, index: int, tokens: List[str]) -> int:
     raise TokenizeError("Expected end of string")
 
 
-def extract_number(json_string: str, index: int, tokens: List[str]) -> int:
+def extract_number(json_string: str, index: int, tokens: Deque[str]) -> int:
     """Extracts a single number token (eg. 42, -12.3) from JSON string"""
     start = index
     end = len(json_string)
@@ -58,7 +59,7 @@ def extract_number(json_string: str, index: int, tokens: List[str]) -> int:
     return index
 
 
-def extract_special(json_string: str, index: int, tokens: List[str]) -> int:
+def extract_special(json_string: str, index: int, tokens: Deque[str]) -> int:
     """Extracts true, false and null from JSON string"""
     end = len(json_string)
 
@@ -78,9 +79,9 @@ def extract_special(json_string: str, index: int, tokens: List[str]) -> int:
     raise TokenizeError(f"Unknown token found: {word}")
 
 
-def tokenize(json_string: str) -> List[str]:
-    """Converts a JSON string into a list of tokens"""
-    tokens: List[str] = []
+def tokenize(json_string: str) -> Deque[str]:
+    """Converts a JSON string into a queue of tokens"""
+    tokens: Deque[str] = deque()
 
     index = 0
     end = len(json_string)

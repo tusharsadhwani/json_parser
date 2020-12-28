@@ -23,4 +23,4 @@ import json_parser.lexer
 )
 def test_lexer(json_string: str, expected: List[str]) -> None:
     """JSON lexer tests"""
-    assert json_parser.lexer.tokenize(json_string) == expected
+    assert list(json_parser.lexer.tokenize(json_string)) == expected

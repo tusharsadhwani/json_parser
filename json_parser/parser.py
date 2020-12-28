@@ -1,5 +1,5 @@
 """Parser functions"""
-from typing import Dict, List, Union
+from typing import Deque, Dict, List, Union
 
 from json_parser.lexer import tokenize
 
@@ -12,17 +12,17 @@ class ParseError(Exception):
     """Error thrown when an invalid JSON tokens is parsed"""
 
 
-def parse_object(tokens: List[str]) -> JSONObject:
+def parse_object(tokens: Deque[str]) -> JSONObject:
     """Parses an object out of JSON tokens"""
     obj: JSONObject = {}
 
     # special case:
     if tokens[0] == '}':
-        tokens.pop(0)
+        tokens.popleft()
         return obj
 
     while tokens:
-        token = tokens.pop(0)
+        token = tokens.popleft()
 
         # least amount of tokens left should be a colon, a token and a }
         if len(tokens) < 3:
@@ -33,7 +33,7 @@ def parse_object(tokens: List[str]) -> JSONObject:
 
         key = parse_string(token)
 
-        token = tokens.pop(0)
+        token = tokens.popleft()
         if token != ':':
             raise ParseError(f"Expected colon, found {token}")
 
@@ -43,7 +43,7 @@ def parse_object(tokens: List[str]) -> JSONObject:
         if not tokens:
             raise ParseError("Unexpected end of file while parsing")
 
-        token = tokens.pop(0)
+        token = tokens.popleft()
         if token not in ',}':
             raise ParseError(f"Expected ',' or '}}', found {token}")
 
@@ -53,13 +53,13 @@ def parse_object(tokens: List[str]) -> JSONObject:
     return obj
 
 
-def parse_array(tokens: List[str]) -> JSONArray:
+def parse_array(tokens: Deque[str]) -> JSONArray:
     """Parses an array out of JSON tokens"""
     array: JSONArray = []
 
     # special case:
     if tokens[0] == ']':
-        tokens.pop(0)
+        tokens.popleft()
         return array
 
     while tokens:
@@ -70,7 +70,7 @@ def parse_array(tokens: List[str]) -> JSONArray:
         value = _parse(tokens)
         array.append(value)
 
-        token = tokens.pop(0)
+        token = tokens.popleft()
         if token not in ',]':
             raise ParseError(f"Expected ',' or ']', found {token}")
 
@@ -98,9 +98,9 @@ def parse_number(token: str) -> JSONNumber:
         raise ParseError(f"Invalid token: {token}") from err
 
 
-def _parse(tokens: List[str]) -> object:
+def _parse(tokens: Deque[str]) -> object:
     """Recursive JSON parse implementation"""
-    token = tokens.pop(0)
+    token = tokens.popleft()
 
     if token == '[':
         return parse_array(tokens)
