@@ -3,8 +3,7 @@ from typing import List
 
 import pytest
 
-import json_parser.lexer
-from json_parser.lexer import TokenizeError
+from json_parser.lexer import tokenize, TokenizeError
 
 
 @pytest.mark.parametrize(
@@ -29,23 +28,32 @@ from json_parser.lexer import TokenizeError
 )
 def test_lexer(json_string: str, expected: List[str]) -> None:
     """JSON lexer tests"""
-    assert list(json_parser.lexer.tokenize(json_string)) == expected
+    assert [token.value for token in tokenize(json_string)] == expected
 
 
 @pytest.mark.parametrize(
     ('json_string', 'error_message'),
     (
         ('', 'Cannot parse empty string'),
-        ('blabla', 'Unknown token found: blabla'),
-        ('"abc', 'Expected end of string'),
-        ('"abc\\"', 'Expected end of string'),
-        ('["a", "b", c]', 'Unknown token found: c'),
+        ('blabla', 'Unknown token found: blabla (line 1 column 1)'),
+        ('"abc', 'Expected end of string (line 1 column 5)'),
+        ('"abc\\"', 'Expected end of string (line 1 column 7)'),
+        ('["a", "b", c]', 'Unknown token found: c (line 1 column 12)'),
+        ('''{
+            "values": ["a", "b", c]
+        }''', 'Unknown token found: c (line 2 column 34)'),
+        ('''{
+            "values": ["a", "b", {
+                "test": "ok",
+                "wow": ["Such", "tests,]
+            }]
+        }''', 'Expected end of string (line 6 column 10)'),
     )
 )
 def test_lexer_failure(json_string: str, error_message: str) -> None:
     """JSON lexer test failutes"""
     with pytest.raises(TokenizeError) as exinfo:
-        json_parser.lexer.tokenize(json_string)
+        tokenize(json_string)
 
     msg, = exinfo.value.args
     assert msg == error_message

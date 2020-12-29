@@ -2,7 +2,7 @@
 from ast import literal_eval
 from typing import Deque, Dict, List, Union
 
-from json_parser.lexer import tokenize
+from json_parser.lexer import Token, tokenize
 
 JSONArray = List[object]
 JSONObject = Dict[str, object]
@@ -13,115 +13,142 @@ class ParseError(Exception):
     """Error thrown when invalid JSON tokens are parsed"""
 
 
-def parse_object(tokens: Deque[str]) -> JSONObject:
+def parse_object(tokens: Deque[Token]) -> JSONObject:
     """Parses an object out of JSON tokens"""
     obj: JSONObject = {}
 
     # special case:
-    if tokens[0] == '}':
+    if tokens[0].type == 'right_brace':
         tokens.popleft()
         return obj
 
     while tokens:
         token = tokens.popleft()
 
-        if not token.startswith('"'):
-            raise ParseError(f"Expected string key for object, found {token}")
+        if not token.type == 'string':
+            raise ParseError(
+                f"Expected string key for object, found {token.value} "
+                f"(line {token.line} column {token.column})")
 
         key = parse_string(token)
 
         if len(tokens) == 0:
-            raise ParseError("Unexpected end of file while parsing")
+            raise ParseError(
+                "Unexpected end of file while parsing (line {line} column {column})")
 
         token = tokens.popleft()
-        if token != ':':
-            raise ParseError(f"Expected colon, found {token}")
+        if token.type != 'colon':
+            raise ParseError(
+                f"Expected colon, found {token.value} "
+                f"(line {token.line} column {token.column})")
 
         # Missing value for key
         if len(tokens) == 0:
-            raise ParseError("Unexpected end of file while parsing")
+            raise ParseError(
+                "Unexpected end of file while parsing "
+                f"(line {token.line} column {token.column+1})")
 
-        if tokens[0] == '}':
-            raise ParseError("Expected value after colon, found }")
+        if tokens[0].type == 'right_brace':
+            token = tokens[0]
+            raise ParseError(
+                "Expected value after colon, found } "
+                f"(line {token.line} column {token.column})")
 
         value = _parse(tokens)
         obj[key] = value
 
         if len(tokens) == 0:
-            raise ParseError("Unexpected end of file while parsing")
+            column_end = token.column + len(token.value)
+            raise ParseError(
+                "Unexpected end of file while parsing "
+                f"(line {token.line} column {column_end})")
 
         token = tokens.popleft()
-        if token not in ',}':
-            raise ParseError(f"Expected ',' or '}}', found {token}")
+        if token.type not in ('comma', 'right_brace'):
+            raise ParseError(
+                f"Expected ',' or '}}', found {token.value}"
+                f" (line {token.line} column {token.column})")
 
-        if token == '}':
+        if token.type == 'right_brace':
             break
 
-        # Trailing comma check
+        # Trailing comma checks
         if len(tokens) == 0:
-            raise ParseError("Unexpected end of file while parsing")
+            column_end = token.column + len(token.value)
+            raise ParseError(
+                "Unexpected end of file while parsing "
+                f"(line {token.line} column {column_end})")
 
-        if tokens[0] == '}':
-            raise ParseError("Expected value after comma, found }")
+        if tokens[0].type == 'right_brace':
+            token = tokens[0]
+            raise ParseError(
+                "Expected value after comma, found } "
+                f"(line {token.line} column {token.column})")
 
     return obj
 
 
-def parse_array(tokens: Deque[str]) -> JSONArray:
+def parse_array(tokens: Deque[Token]) -> JSONArray:
     """Parses an array out of JSON tokens"""
     array: JSONArray = []
 
     # special case:
-    if tokens[0] == ']':
+    if tokens[0].type == 'right_bracket':
         tokens.popleft()
         return array
 
     while tokens:
-        # least number of tokens left should be a token and a ]
-        if len(tokens) < 2:
-            raise ParseError("Unexpected end of file while parsing")
-
         value = _parse(tokens)
         array.append(value)
 
         token = tokens.popleft()
-        if token not in ',]':
-            raise ParseError(f"Expected ',' or ']', found {token}")
+        if token.type not in ('comma', 'right_bracket'):
+            raise ParseError(
+                f"Expected ',' or ']', found {token.value} "
+                f"(line {token.line} column {token.column})")
 
-        if token == ']':
+        if token.type == 'right_bracket':
             break
 
         # trailing comma check
         if len(tokens) == 0:
-            raise ParseError("Unexpected end of file while parsing")
+            column_end = token.column + len(token.value)
+            raise ParseError(
+                "Unexpected end of file while parsing "
+                f"(line {token.line} column {column_end})")
 
-        if tokens[0] == ']':
-            raise ParseError("Expected value after comma, found ]")
+        if tokens[0].type == 'right_bracket':
+            token = tokens[0]
+            raise ParseError(
+                "Expected value after comma, found ] "
+                f"(line {token.line} column {token.column})")
 
     return array
 
 
-def parse_string(token: str) -> str:
+def parse_string(token: Token) -> str:
     """Parses a string out of a JSON token"""
     chars: List[str] = []
 
     index = 1
-    end = len(token) - 1
+    end = len(token.value) - 1
     while index < end:
-        char = token[index]
+        char = token.value[index]
 
         if char != '\\':
             chars.append(char)
             index += 1
             continue
 
-        next_char = token[index+1]
+        next_char = token.value[index+1]
         if next_char == 'u':
-            hex_string = token[index+2:index+6]
+            hex_string = token.value[index+2:index+6]
             try:
                 unicode_char = literal_eval(f'"\\u{hex_string}"')
             except ValueError as err:
-                raise ParseError(f"Invalid escape: \\u{hex_string}") from err
+                raise ParseError(
+                    f"Invalid escape: \\u{hex_string} "
+                    f"(line {token.line} column {token.column})") from err
 
             chars.append(unicode_char)
             index += 6
@@ -140,7 +167,9 @@ def parse_string(token: str) -> str:
         elif next_char == 't':
             chars.append('\t')
         else:
-            raise ParseError(f"Unknown escape sequence found in {token}")
+            raise ParseError(
+                f"Unknown escape sequence found in {token.value} "
+                f"(line {token.line} column {token.column})")
 
         index += 2
 
@@ -148,33 +177,35 @@ def parse_string(token: str) -> str:
     return string
 
 
-def parse_number(token: str) -> JSONNumber:
+def parse_number(token: Token) -> JSONNumber:
     """Parses a number out of a JSON token"""
     try:
-        if token.isdigit():
-            number: JSONNumber = int(token)
+        if token.value.isdigit():
+            number: JSONNumber = int(token.value)
         else:
-            number = float(token)
+            number = float(token.value)
         return number
 
     except ValueError as err:
-        raise ParseError(f"Invalid token: {token}") from err
+        raise ParseError(
+            f"Invalid token: {token.value} "
+            f"(line {token.line} column {token.column})") from err
 
 
-def _parse(tokens: Deque[str]) -> object:
+def _parse(tokens: Deque[Token]) -> object:
     """Recursive JSON parse implementation"""
     token = tokens.popleft()
 
-    if token == '[':
+    if token.type == 'left_bracket':
         return parse_array(tokens)
 
-    if token == '{':
+    if token.type == 'left_brace':
         return parse_object(tokens)
 
-    if token.startswith('"'):
+    if token.type == 'string':
         return parse_string(token)
 
-    if token[0] == '-' or token[0].isdigit():
+    if token.type == 'number':
         return parse_number(token)
 
     special_tokens = {
@@ -182,10 +213,12 @@ def _parse(tokens: Deque[str]) -> object:
         'false': False,
         'null': None,
     }
-    if token in special_tokens:
-        return special_tokens[token]
+    if token.type in ('boolean', 'null'):
+        return special_tokens[token.value]
 
-    raise ParseError(f"Unexpected token: {token}")
+    raise ParseError(
+        f"Unexpected token: {token.value} "
+        f"(line {token.line} column {token.column})")
 
 
 def parse(json_string: str) -> object:
@@ -194,6 +227,8 @@ def parse(json_string: str) -> object:
 
     value = _parse(tokens)
     if len(tokens) != 0:
-        raise ParseError(f"Invalid JSON at {tokens[0]}")
+        raise ParseError(
+            f"Invalid JSON at {tokens[0].value} "
+            f"(line {tokens[0].line} column {tokens[0].column})")
 
     return value
