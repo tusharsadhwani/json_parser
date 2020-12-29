@@ -27,43 +27,63 @@ def parse_object(tokens: Deque[Token]) -> JSONObject:
 
         if not token.type == 'string':
             raise ParseError(
-                f"Expected string key for object, found {token.value}")
+                f"Expected string key for object, found {token.value} "
+                f"(line {token.line} column {token.column})")
 
         key = parse_string(token)
 
         if len(tokens) == 0:
-            raise ParseError("Unexpected end of file while parsing")
+            raise ParseError(
+                "Unexpected end of file while parsing (line {line} column {column})")
 
         token = tokens.popleft()
         if token.type != 'colon':
-            raise ParseError(f"Expected colon, found {token.value}")
+            raise ParseError(
+                f"Expected colon, found {token.value} "
+                f"(line {token.line} column {token.column})")
 
         # Missing value for key
         if len(tokens) == 0:
-            raise ParseError("Unexpected end of file while parsing")
+            raise ParseError(
+                "Unexpected end of file while parsing "
+                f"(line {token.line} column {token.column+1})")
 
         if tokens[0].type == 'right_brace':
-            raise ParseError("Expected value after colon, found }")
+            token = tokens[0]
+            raise ParseError(
+                "Expected value after colon, found } "
+                f"(line {token.line} column {token.column})")
 
         value = _parse(tokens)
         obj[key] = value
 
         if len(tokens) == 0:
-            raise ParseError("Unexpected end of file while parsing")
+            column_end = token.column + len(token.value)
+            raise ParseError(
+                "Unexpected end of file while parsing "
+                f"(line {token.line} column {column_end})")
 
         token = tokens.popleft()
         if token.type not in ('comma', 'right_brace'):
-            raise ParseError(f"Expected ',' or '}}', found {token.value}")
+            raise ParseError(
+                f"Expected ',' or '}}', found {token.value}"
+                f" (line {token.line} column {token.column})")
 
         if token.type == 'right_brace':
             break
 
-        # Trailing comma check
+        # Trailing comma checks
         if len(tokens) == 0:
-            raise ParseError("Unexpected end of file while parsing")
+            column_end = token.column + len(token.value)
+            raise ParseError(
+                "Unexpected end of file while parsing "
+                f"(line {token.line} column {column_end})")
 
         if tokens[0].type == 'right_brace':
-            raise ParseError("Expected value after comma, found }")
+            token = tokens[0]
+            raise ParseError(
+                "Expected value after comma, found } "
+                f"(line {token.line} column {token.column})")
 
     return obj
 
@@ -78,26 +98,30 @@ def parse_array(tokens: Deque[Token]) -> JSONArray:
         return array
 
     while tokens:
-        # least number of tokens left should be a token and a ]
-        if len(tokens) < 2:
-            raise ParseError("Unexpected end of file while parsing")
-
         value = _parse(tokens)
         array.append(value)
 
         token = tokens.popleft()
         if token.type not in ('comma', 'right_bracket'):
-            raise ParseError(f"Expected ',' or ']', found {token.value}")
+            raise ParseError(
+                f"Expected ',' or ']', found {token.value} "
+                f"(line {token.line} column {token.column})")
 
         if token.type == 'right_bracket':
             break
 
         # trailing comma check
         if len(tokens) == 0:
-            raise ParseError("Unexpected end of file while parsing")
+            column_end = token.column + len(token.value)
+            raise ParseError(
+                "Unexpected end of file while parsing "
+                f"(line {token.line} column {column_end})")
 
         if tokens[0].type == 'right_bracket':
-            raise ParseError("Expected value after comma, found ]")
+            token = tokens[0]
+            raise ParseError(
+                "Expected value after comma, found ] "
+                f"(line {token.line} column {token.column})")
 
     return array
 
@@ -122,7 +146,9 @@ def parse_string(token: Token) -> str:
             try:
                 unicode_char = literal_eval(f'"\\u{hex_string}"')
             except ValueError as err:
-                raise ParseError(f"Invalid escape: \\u{hex_string}") from err
+                raise ParseError(
+                    f"Invalid escape: \\u{hex_string} "
+                    f"(line {token.line} column {token.column})") from err
 
             chars.append(unicode_char)
             index += 6
@@ -141,7 +167,9 @@ def parse_string(token: Token) -> str:
         elif next_char == 't':
             chars.append('\t')
         else:
-            raise ParseError(f"Unknown escape sequence found in {token.value}")
+            raise ParseError(
+                f"Unknown escape sequence found in {token.value} "
+                f"(line {token.line} column {token.column})")
 
         index += 2
 
@@ -159,7 +187,9 @@ def parse_number(token: Token) -> JSONNumber:
         return number
 
     except ValueError as err:
-        raise ParseError(f"Invalid token: {token.value}") from err
+        raise ParseError(
+            f"Invalid token: {token.value} "
+            f"(line {token.line} column {token.column})") from err
 
 
 def _parse(tokens: Deque[Token]) -> object:
@@ -186,7 +216,9 @@ def _parse(tokens: Deque[Token]) -> object:
     if token.type in ('boolean', 'null'):
         return special_tokens[token.value]
 
-    raise ParseError(f"Unexpected token: {token.value}")
+    raise ParseError(
+        f"Unexpected token: {token.value} "
+        f"(line {token.line} column {token.column})")
 
 
 def parse(json_string: str) -> object:
@@ -195,6 +227,8 @@ def parse(json_string: str) -> object:
 
     value = _parse(tokens)
     if len(tokens) != 0:
-        raise ParseError(f"Invalid JSON at {tokens[0].value}")
+        raise ParseError(
+            f"Invalid JSON at {tokens[0].value} "
+            f"(line {tokens[0].line} column {tokens[0].column})")
 
     return value

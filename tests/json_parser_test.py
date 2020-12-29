@@ -127,13 +127,83 @@ def test_parser(json_string: str, expected: Dict[str, object]) -> None:
 @pytest.mark.parametrize(
     ('json_string', 'error_message'),
     (
-        ('[1, 2, 3,]', 'Expected value after comma, found ]'),
-        ('[1, 2 "hello"]', "Expected ',' or ']', found \"hello\""),
-        ('{35: "test"}', "Expected string key for object, found 35"),
-        ('{"abc":}', "Expected value after colon, found }"),
-        ('{"abc":"def",}', "Expected value after comma, found }"),
-        ('{"abc":', "Unexpected end of file while parsing"),
-        ('[2,', "Unexpected end of file while parsing"),
+        ('[1, 2, 3,]', 'Expected value after comma, found ] (line 1 column 10)'),
+        ('[1, 2 "hello"]', "Expected ',' or ']', found \"hello\" (line 1 column 7)"),
+        ('{35: "test"}', "Expected string key for object, found 35 (line 1 column 2)"),
+        ('{"abc":}', "Expected value after colon, found } (line 1 column 8)"),
+        ('{"abc":"def",}', "Expected value after comma, found } (line 1 column 14)"),
+        ('{"abc":', "Unexpected end of file while parsing (line 1 column 8)"),
+        ('[2,', "Unexpected end of file while parsing (line 1 column 4)"),
+        (
+            """{
+            "results": [
+                {
+                "gender": "male",
+                "name": {
+                    "title": "Mr",
+                    "first": "\u0633\u06cc\u0646\u0627",
+                    "last": "\u0645\u0648\u0633\u0648\u06cc"
+                },
+                "location": {
+                    "street": {
+                      "number": 8134,
+                      "name": "\u0645\u06cc\u062f\u0627\u0646 \u0627\u0645\u0627\u0645 \u062d\u0633\u06cc\u0646"
+                    },
+                    "city": "\u0627\u0631\u0648\u0645\u06cc\u0647",
+                    "state": "\u062e\u0648\u0632\u0633\u062a\u0627\u0646",
+                    "country": "Iran",
+                    "postcode": 24340,
+                    "coordinates": {
+                      "latitude": "27.3083",
+                      "longitude": "-104.2564"
+                    },
+                    "timezone": {
+                    "offset": "0:00",
+                    "description": "Western Europe Time, \n\n    London, Lisbon, Casablanca"
+                    }
+                },
+                "email": "syn.mwswy@example.com",
+                "login": {
+                    "uuid": "8a6da152-019a-40b4-80b0-bfafd5281fd7",
+                    "username": "sadbear764",
+                    "password": "1947",
+                    "salt": "ddKNbUrc",
+                    "md5": "7ff0c750f9b8d7690d50385754a7fe25",
+                    "sha1": "e140544e222f27a2d0aa809ccb00a1d1ca1fda60",
+                    "sha256": "fd5dbd61da24a82f48971a6d027400a2fd5b0808fd108764f17d87aaa61774d9"
+                },
+                "dob": {
+                    "date": "1996-12-06T21:55:10.574Z",
+                    "age": 24
+                },
+                "registered": {
+                    "date": "2013-04-07T05:56:17.049Z",
+                    "age": 7
+                },
+                "phone": "083-15098477",
+                "cell": "0998-569-1505",
+                14: {
+                    "name": "",
+                    "value": null
+                },
+                "picture": {
+                    "large": "https://randomuser.me/api/portraits/men/94.jpg",
+                    "medium": "https://randomuser.me/api/portraits/med/men/94.jpg",
+                    "thumbnail": "https://randomuser.me/api/portraits/thumb/men/94.jpg"
+                },
+                "nat": "IR"
+                }
+            ],
+            "info": {
+                "seed": "db5d8d673b395e5a",
+                "results": 1,
+                "page": 1,
+                "version": "1.3"
+            }
+            }
+            """,
+            "Expected string key for object, found 14 (line 50 column 17)",
+        )
     )
 )
 def test_parser_failure(json_string: str, error_message: str) -> None:
