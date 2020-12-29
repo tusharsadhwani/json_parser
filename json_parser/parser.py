@@ -33,8 +33,10 @@ def parse_object(tokens: Deque[Token]) -> JSONObject:
         key = parse_string(token)
 
         if len(tokens) == 0:
+            column_end = token.column + len(token.value)
             raise ParseError(
-                "Unexpected end of file while parsing (line {line} column {column})")
+                "Unexpected end of file while parsing "
+                f"(line {token.line} column {column_end})")
 
         token = tokens.popleft()
         if token.type != 'colon':

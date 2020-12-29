@@ -132,6 +132,7 @@ def test_parser(json_string: str, expected: Dict[str, object]) -> None:
         ('{35: "test"}', "Expected string key for object, found 35 (line 1 column 2)"),
         ('{"abc":}', "Expected value after colon, found } (line 1 column 8)"),
         ('{"abc":"def",}', "Expected value after comma, found } (line 1 column 14)"),
+        ('{"abc"', "Unexpected end of file while parsing (line 1 column 7)"),
         ('{"abc":', "Unexpected end of file while parsing (line 1 column 8)"),
         ('[2,', "Unexpected end of file while parsing (line 1 column 4)"),
         (
