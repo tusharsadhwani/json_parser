@@ -135,6 +135,7 @@ def test_parser(json_string: str, expected: Dict[str, object]) -> None:
         ('{"abc"', "Unexpected end of file while parsing (line 1 column 7)"),
         ('{"abc":', "Unexpected end of file while parsing (line 1 column 8)"),
         ('[2,', "Unexpected end of file while parsing (line 1 column 4)"),
+        ('"Abcd\\u123xab"', "Invalid unicode escape: \\u123x (line 1 column 6)"),
         (
             """{
             "results": [

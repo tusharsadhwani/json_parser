@@ -134,12 +134,19 @@ def parse_string(token: Token) -> str:
 
     index = 1
     end = len(token.value) - 1
+    line, column = token.line, token.column + 1
+
     while index < end:
         char = token.value[index]
 
         if char != '\\':
             chars.append(char)
             index += 1
+            if char == '\n':
+                line += 1
+                column = 1
+            else:
+                column += 1
             continue
 
         next_char = token.value[index+1]
@@ -147,16 +154,17 @@ def parse_string(token: Token) -> str:
             hex_string = token.value[index+2:index+6]
             try:
                 unicode_char = literal_eval(f'"\\u{hex_string}"')
-            except ValueError as err:
+            except SyntaxError as err:
                 raise ParseError(
-                    f"Invalid escape: \\u{hex_string} "
-                    f"(line {token.line} column {token.column})") from err
+                    f"Invalid unicode escape: \\u{hex_string} "
+                    f"(line {line} column {column})") from err
 
             chars.append(unicode_char)
             index += 6
+            column += 6
             continue
 
-        if next_char in '"\\/':
+        if next_char in ('"', '/', '\\'):
             chars.append(next_char)
         elif next_char == 'b':
             chars.append('\b')
@@ -170,10 +178,11 @@ def parse_string(token: Token) -> str:
             chars.append('\t')
         else:
             raise ParseError(
-                f"Unknown escape sequence found in {token.value} "
-                f"(line {token.line} column {token.column})")
+                f"Unknown escape sequence: {token.value} "
+                f"(line {line} column {column})")
 
         index += 2
+        column += 2
 
     string = ''.join(chars)
     return string
