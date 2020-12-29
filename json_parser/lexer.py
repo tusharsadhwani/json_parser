@@ -1,14 +1,33 @@
 """Lexer functions"""
-import string
 from collections import deque
-from typing import Deque
+from typing import Deque, Literal, NamedTuple
+from string import whitespace as WHITESPACE
+
+TokenType = Literal[
+    'string',
+    'number',
+    'boolean',
+    'null',
+    'left_bracket',
+    'left_brace',
+    'right_bracket',
+    'right_brace',
+    'comma',
+    'colon',
+]
+
+
+class Token(NamedTuple):
+    """Represents a Token extracted by the parser"""
+    value: str
+    type: TokenType
 
 
 class TokenizeError(Exception):
     """Error thrown when an invalid JSON string is tokenized"""
 
 
-def extract_string(json_string: str, index: int, tokens: Deque[str]) -> int:
+def extract_string(json_string: str, index: int, tokens: Deque[Token]) -> int:
     """Extracts a single string token from JSON string"""
     start = index
     end = len(json_string)
@@ -26,8 +45,8 @@ def extract_string(json_string: str, index: int, tokens: Deque[str]) -> int:
 
         if char == '"':
             index += 1
-            string_token = json_string[start:index]
-            tokens.append(string_token)
+            string = json_string[start:index]
+            tokens.append(Token(string, type='string'))
             return index
 
         index += 1
@@ -35,7 +54,7 @@ def extract_string(json_string: str, index: int, tokens: Deque[str]) -> int:
     raise TokenizeError("Expected end of string")
 
 
-def extract_number(json_string: str, index: int, tokens: Deque[str]) -> int:
+def extract_number(json_string: str, index: int, tokens: Deque[Token]) -> int:
     """Extracts a single number token (eg. 42, -12.3) from JSON string"""
     start = index
     end = len(json_string)
@@ -62,12 +81,12 @@ def extract_number(json_string: str, index: int, tokens: Deque[str]) -> int:
 
         index += 1
 
-    string_token = json_string[start:index]
-    tokens.append(string_token)
+    number = json_string[start:index]
+    tokens.append(Token(number, type='number'))
     return index
 
 
-def extract_special(json_string: str, index: int, tokens: Deque[str]) -> int:
+def extract_special(json_string: str, index: int, tokens: Deque[Token]) -> int:
     """Extracts true, false and null from JSON string"""
     end = len(json_string)
 
@@ -81,26 +100,35 @@ def extract_special(json_string: str, index: int, tokens: Deque[str]) -> int:
         index += 1
 
     if word in ('true', 'false', 'null'):
-        tokens.append(word)
+        token = Token(word, type='null' if word == 'null' else 'boolean')
+        tokens.append(token)
         return index
 
     raise TokenizeError(f"Unknown token found: {word}")
 
 
-def tokenize(json_string: str) -> Deque[str]:
+def tokenize(json_string: str) -> Deque[Token]:
     """Converts a JSON string into a queue of tokens"""
-    tokens: Deque[str] = deque()
+    tokens: Deque[Token] = deque()
 
     index = 0
     end = len(json_string)
     while index < end:
         char = json_string[index]
 
-        if char in string.whitespace:
+        if char in WHITESPACE:
             index += 1
 
-        elif char in '[]{}:,':
-            tokens.append(char)
+        elif char in '[]{},:':
+            token = Token(
+                char,
+                type=('left_bracket' if char == '[' else
+                      'right_bracket' if char == ']' else
+                      'left_brace' if char == '{' else
+                      'right_brace' if char == '}' else
+                      'comma' if char == ',' else 'colon')
+            )
+            tokens.append(token)
             index += 1
 
         elif char == '"':
@@ -114,4 +142,5 @@ def tokenize(json_string: str) -> Deque[str]:
 
     if len(tokens) == 0:
         raise TokenizeError("Cannot parse empty string")
+
     return tokens

@@ -3,8 +3,7 @@ from typing import List
 
 import pytest
 
-import json_parser.lexer
-from json_parser.lexer import TokenizeError
+from json_parser.lexer import tokenize, TokenizeError
 
 
 @pytest.mark.parametrize(
@@ -29,7 +28,7 @@ from json_parser.lexer import TokenizeError
 )
 def test_lexer(json_string: str, expected: List[str]) -> None:
     """JSON lexer tests"""
-    assert list(json_parser.lexer.tokenize(json_string)) == expected
+    assert [token.value for token in tokenize(json_string)] == expected
 
 
 @pytest.mark.parametrize(
@@ -45,7 +44,7 @@ def test_lexer(json_string: str, expected: List[str]) -> None:
 def test_lexer_failure(json_string: str, error_message: str) -> None:
     """JSON lexer test failutes"""
     with pytest.raises(TokenizeError) as exinfo:
-        json_parser.lexer.tokenize(json_string)
+        tokenize(json_string)
 
     msg, = exinfo.value.args
     assert msg == error_message
