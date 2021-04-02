@@ -6,13 +6,13 @@ An _efficient_ JSON parser written in Python.
 
 Install it via pip:
 
-```console
+```bash
 pip install json-parser
 ```
 
 ## Usage
 
-```py
+```python
 import json_parser
 
 data = json_parser.parse('{"value": 42}')
@@ -23,20 +23,20 @@ print(data['value']) # 42
 
 Running it on [this 25MB JSON file][1] gave the following results:
 
-```python
+```pycon
 >>> with open('large-file.json') as f:
 ...   t = time.time()
 ...   x = json.load(f)
 ...   t = time.time() - t
 ...   print(t, 'seconds')
-... 
+...
 0.6405608654022217 seconds
 >>> with open('large-file.json') as f:
 ...   t = time.time()
 ...   y = json_parser.parse(f.read())
 ...   t = time.time() - t
 ...   print(t, 'seconds')
-... 
+...
 22.286625385284424 seconds
 >>> x == y
 True
@@ -49,8 +49,8 @@ Which, is par for the course when it comes to pure python.
 
 Clone the app and run the following:
 
-```console
-pip install -e .
+```bash
+pip install -e '.[dev]'
 pytest
 ```
 
